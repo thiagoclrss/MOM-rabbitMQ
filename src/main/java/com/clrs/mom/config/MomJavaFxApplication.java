@@ -13,16 +13,13 @@ public class MomJavaFxApplication extends Application {
 
     @Override
     public void init() {
-        // Inicializa o Spring Boot em background sem abrir um servidor web
         springContext = new SpringApplicationBuilder(MomApplication.class)
-                .headless(false) // Necessário para permitir a UI do JavaFX
+                .headless(false)
                 .run();
     }
 
     @Override
     public void start(Stage primaryStage) {
-        // Aqui você carregará o seu arquivo FXML ou criará a UI programaticamente
-        // O springContext pode ser usado para buscar seus Beans (controllers, serviços)
         springContext.publishEvent(new StageReadyEvent(primaryStage));
     }
 

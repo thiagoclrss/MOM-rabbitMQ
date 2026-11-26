@@ -1,5 +1,6 @@
-package com.clrs.mom.config; // Ajuste para o pacote onde está o seu StageInitializer
+package com.clrs.mom.ui;
 
+import com.clrs.mom.config.StageReadyEvent;
 import com.clrs.mom.dto.WordCountMessage;
 import com.clrs.mom.producer.LineProducerService;
 import com.clrs.mom.subscriber.DashboardSubscriber;
@@ -82,7 +83,7 @@ public class StageInitializer implements ApplicationListener<StageReadyEvent> {
 
         Label statusLabel = new Label("Aguardando início...");
 
-        // --- SEÇÃO DO DASHBOARD ---
+
         TableView<WordRow> tableView = new TableView<>(tableData);
         tableView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN);
         VBox.setVgrow(tableView, Priority.ALWAYS);
@@ -95,7 +96,6 @@ public class StageInitializer implements ApplicationListener<StageReadyEvent> {
 
         tableView.getColumns().addAll(wordCol, countCol);
 
-        // --- AÇÃO DO BOTÃO INICIAR ---
         startBtn.setOnAction(e -> {
             if (selectedFilePath == null) {
                 statusLabel.setText("Erro: Selecione um arquivo primeiro.");
@@ -113,7 +113,7 @@ public class StageInitializer implements ApplicationListener<StageReadyEvent> {
                     .distinct()
                     .toList();
 
-            // Reseta o Dashboard e inicializa as palavras com 0
+
             tableData.clear();
             wordRowMap.clear();
             for (String kw : keywords) {
@@ -126,10 +126,9 @@ public class StageInitializer implements ApplicationListener<StageReadyEvent> {
             lineProducerService.startReading(selectedFilePath, keywords);
         });
 
-        // --- CONEXÃO DO SUBSCRIBER COM A UI ---
+
         dashboardSubscriber.setOnMessageReceived(message -> updateDashboard(message, statusLabel));
 
-        // --- LAYOUT PRINCIPAL ---
         VBox root = new VBox(15, titleLabel, fileBox, keywordsBox, statusLabel, tableView);
         root.setPadding(new Insets(20));
 
@@ -140,8 +139,6 @@ public class StageInitializer implements ApplicationListener<StageReadyEvent> {
     }
 
     private void updateDashboard(WordCountMessage message, Label statusLabel) {
-        // Obrigatório no JavaFX: atualizações de UI vindas de threads externas (RabbitMQ)
-        // devem ser agendadas na JavaFX Application Thread via Platform.runLater
         Platform.runLater(() -> {
             message.counts().forEach((word, count) -> {
                 WordRow row = wordRowMap.get(word.toLowerCase());
@@ -153,7 +150,6 @@ public class StageInitializer implements ApplicationListener<StageReadyEvent> {
         });
     }
 
-    // Classe auxiliar para exibir e atualizar as linhas da tabela reativamente
     public static class WordRow {
         private final StringProperty word;
         private final IntegerProperty count;
